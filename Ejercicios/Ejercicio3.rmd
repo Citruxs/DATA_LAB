@@ -1,0 +1,41 @@
+
+```{r}
+ts <- read_csv("ejercicio_3.csv")
+ts$Clave_Ent <- as.factor(ts$Clave_Ent)
+```
+
+```{r}
+ts_21 <- ts %>% filter(Clave_Ent == 21)
+```
+
+
+```{r}
+ts_21
+```
+
+```{r}
+ts_21 <- ts(ts_21$`Homicidio_Homicidio-doloso`, start = c(2017,1), frequency = 24)
+```
+
+
+```{r}
+ts.plot(ts_21)
+```
+
+```{r}
+modelo <- auto.arima(ts_21)
+plot(forecast(modelo, h = 36))
+```
+
+```{r}
+modelo <- auto.arima(ts_21)
+modelo
+```
+
+
+```{r}
+plot(forecast(HoltWinters(ts_21),24))
+```
+
+
+\newpage

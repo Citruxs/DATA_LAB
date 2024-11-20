@@ -1,0 +1,52 @@
+
+1. Obtener los resultados de la elección Municipal 2021 de Baja California para el municipio de Tecate y Tijuana, además los resultados de las elecciones de Gubernatura más recientes para la entidad. Representar sus resultados a través de gráficas o mapas. En este ejercicio los datos deberán ser obtenidos de portales públicos.
+
+```{r}
+municipios <- read_csv("Elecciones_BajaCalifornia_Municipios.csv")
+
+tecate <- municipios %>% filter(MUNICIPIO == "TECATE")
+tijuana <- municipios %>% filter(MUNICIPIO == "TIJUANA")
+```
+
+```{r}
+#Resultados por partido en Tecate
+resultados_tecate <- data.frame(PARTIDO = c(colnames(tecate)[5:15],colnames(tecate)[21:30]), 
+                                VOTOS = c(sapply(5:15,function(x){sum(tecate[,x])}),
+                                          sapply(21:30,function(x){sum(tecate[,x])}))) 
+
+resultados_tecate <- resultados_tecate %>% filter(VOTOS > 0)
+
+ggplot() + geom_bar(data = resultados_tecate, aes(x = reorder(PARTIDO, -VOTOS), y = VOTOS, fill = PARTIDO), stat = "identity") + 
+           theme_minimal() + 
+           theme(axis.text.x = element_text(angle = 45, hjust = 1)) + 
+           labs(title = "Resultados por partido en Tecate", x = "Partido", y = "Votos")
+
+```
+
+```{r}
+resultados_tijuana <- data.frame(PARTIDO = c(colnames(tijuana)[5:15],colnames(tijuana)[21:30]), 
+                                 VOTOS = c(sapply(5:15,function(x){sum(tijuana[,x])}),
+                                           sapply(21:30,function(x){sum(tijuana[,x])}))) 
+
+resultados_tijuana <- resultados_tijuana %>% filter(VOTOS > 0)
+
+ggplot() + geom_bar(data = resultados_tijuana, aes(x = reorder(PARTIDO, -VOTOS), y = VOTOS, fill = PARTIDO), stat = "identity") + 
+           theme_minimal() + 
+           theme(axis.text.x = element_text(angle = 45, hjust = 1)) + 
+           labs(title = "Resultados por partido en Tecate", x = "Partido", y = "Votos")
+```
+
+```{r message=FALSE}
+gubernatura <- read_csv("Elecciones_BajaCalifornia_Gubernatura.csv")
+
+votos_gubernatura <- data.frame(PARTIDO = colnames(gubernatura)[5:25], 
+                                VOTOS = sapply(5:25,function(x){sum(gubernatura[,x])}))
+
+votos_gubernatura <- votos_gubernatura %>% filter(VOTOS > 0)
+
+ggplot() + geom_bar(data = votos_gubernatura, aes(x = reorder(PARTIDO, -VOTOS), y = VOTOS, fill = PARTIDO), stat = "identity") + 
+           theme_minimal() + 
+           theme(axis.text.x = element_text(angle = 45, hjust = 1)) + 
+           labs(title = "Resultados por partido en la elección de Gubernatura", x = "Partido", y = "Votos")
+```
+
