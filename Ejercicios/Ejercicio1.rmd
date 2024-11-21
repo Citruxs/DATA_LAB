@@ -1,12 +1,16 @@
 
-1. Obtener los resultados de la elección Municipal 2021 de Baja California para el municipio de Tecate y Tijuana, además los resultados de las elecciones de Gubernatura más recientes para la entidad. Representar sus resultados a través de gráficas o mapas. En este ejercicio los datos deberán ser obtenidos de portales públicos.
+Obtener los resultados de la elección Municipal 2021 de Baja California para el municipio de Tecate y Tijuana, además los resultados de las elecciones de Gubernatura más recientes para la entidad. Representar sus resultados a través de gráficas o mapas. En este ejercicio los datos deberán ser obtenidos de portales públicos.
+
+Para esto consideraremos lso datos de las elecciones de Baja California para cada municipio y la elección de la gubernatura. Ambos datos los podemos encontrar en **Elecciones_BajaCalifornia_Municipios.csv** y **Elecciones_BajaCalifornia_Gubernatura.csv** respectivamente.
 
 ```{r}
-municipios <- read_csv("Elecciones_BajaCalifornia_Municipios.csv")
+municipios <- read_csv("Elecciones_BajaCalifornia_Municipios.csv") #Leemos los datos
 
-tecate <- municipios %>% filter(MUNICIPIO == "TECATE")
-tijuana <- municipios %>% filter(MUNICIPIO == "TIJUANA")
+tecate <- municipios %>% filter(MUNICIPIO == "TECATE") #Filtramos los datos para Tecate
+tijuana <- municipios %>% filter(MUNICIPIO == "TIJUANA") #Filtramos los datos para Tijuana
 ```
+
+Como queremos ver los resultados por partido, podemos agrupar el total de votos que obtuvo cada partido para cada municipio. Para esto, podemos sumar los votos de cada partido en cada municipio y representarlos en una gráfica de barras. Además también filtramos y eliminamos los partidos que no obtuvieron votos. De esta manera los resultados se ven expuestos en la siguiente grafica
 
 ```{r}
 #Resultados por partido en Tecate
@@ -16,25 +20,35 @@ resultados_tecate <- data.frame(PARTIDO = c(colnames(tecate)[5:15],colnames(teca
 
 resultados_tecate <- resultados_tecate %>% filter(VOTOS > 0)
 
-ggplot() + geom_bar(data = resultados_tecate, aes(x = reorder(PARTIDO, -VOTOS), y = VOTOS, fill = PARTIDO), stat = "identity") + 
+ggplot() + geom_bar(data = resultados_tecate, aes(x = reorder(PARTIDO, -VOTOS), 
+                                                  y = VOTOS, fill = PARTIDO), stat = "identity") + 
            theme_minimal() + 
            theme(axis.text.x = element_text(angle = 45, hjust = 1)) + 
-           labs(title = "Resultados por partido en Tecate", x = "Partido", y = "Votos")
+           labs(title = "Resultados por partido para las elecciones municipales de 2021 en Tecate", 
+                x = "Partido", y = "Votos") +
+           scale_y_continuous(labels = scales::percent_format(scale = 100/sum(resultados_tecate$VOTOS)))
 
 ```
+
+De manera similar, podemos hacer lo mismo para los resultados en Tijuana
 
 ```{r}
 resultados_tijuana <- data.frame(PARTIDO = c(colnames(tijuana)[5:15],colnames(tijuana)[21:30]), 
                                  VOTOS = c(sapply(5:15,function(x){sum(tijuana[,x])}),
                                            sapply(21:30,function(x){sum(tijuana[,x])}))) 
 
-resultados_tijuana <- resultados_tijuana %>% filter(VOTOS > 0)
+resultados_tijuana <- resultados_tijuana %>% filter(VOTOS > 0) 
 
-ggplot() + geom_bar(data = resultados_tijuana, aes(x = reorder(PARTIDO, -VOTOS), y = VOTOS, fill = PARTIDO), stat = "identity") + 
+ggplot() + geom_bar(data = resultados_tijuana, aes(x = reorder(PARTIDO, -VOTOS), 
+                                                   y = VOTOS, fill = PARTIDO), stat = "identity") + 
            theme_minimal() + 
            theme(axis.text.x = element_text(angle = 45, hjust = 1)) + 
-           labs(title = "Resultados por partido en Tecate", x = "Partido", y = "Votos")
+           labs(title = "Resultados por partido para las elecciones municipales de 2021 en Tijuana", 
+                x = "Partido", y = "Votos") +
+           scale_y_continuous(labels = scales::percent_format(scale = 100/sum(resultados_tijuana$VOTOS)))
 ```
+
+Por otro lado para los datos de las elecciones de gubernatura, podemos considerar solo a los partidos que obtuvieron al menos el 1% del total de votos:
 
 ```{r message=FALSE}
 gubernatura <- read_csv("Elecciones_BajaCalifornia_Gubernatura.csv")
@@ -42,11 +56,12 @@ gubernatura <- read_csv("Elecciones_BajaCalifornia_Gubernatura.csv")
 votos_gubernatura <- data.frame(PARTIDO = colnames(gubernatura)[5:25], 
                                 VOTOS = sapply(5:25,function(x){sum(gubernatura[,x])}))
 
-votos_gubernatura <- votos_gubernatura %>% filter(VOTOS > 0)
+votos_gubernatura <- votos_gubernatura %>% filter(VOTOS >= sum(VOTOS)*0.01)
 
-ggplot() + geom_bar(data = votos_gubernatura, aes(x = reorder(PARTIDO, -VOTOS), y = VOTOS, fill = PARTIDO), stat = "identity") + 
+ggplot() + geom_bar(data = votos_gubernatura, aes(x = reorder(PARTIDO, -VOTOS), 
+                                                  y = VOTOS, fill = PARTIDO), stat = "identity") + 
            theme_minimal() + 
            theme(axis.text.x = element_text(angle = 45, hjust = 1)) + 
-           labs(title = "Resultados por partido en la elección de Gubernatura", x = "Partido", y = "Votos")
+           labs(title = "Resultados por partido en la elección de Gubernatura 2021", x = "Partido", y = "Votos") +
+           scale_y_continuous(labels = scales::percent_format(scale = 100/sum(votos_gubernatura$VOTOS)))
 ```
-

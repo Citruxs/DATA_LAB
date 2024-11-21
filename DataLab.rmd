@@ -1,22 +1,13 @@
 ---
-# title: Seminario de Estadística I - Aprendizaje Estadístico Automatizado
-# subtitle: Tarea 2A - Selección de variables, bootstrap y aprendizaje no supervisado
-# author: |
-#   | Johan Jesús González Navarrete
-#   | Andrés Limón Cruz
-#   | Luis Brayan López Canché
-#   | Jorge Alberto Herrera León
-# date: "`r format(Sys.Date(), '%d de %B del %Y')`"
+title: Ejercicios prácticos - Ciencia de Datos
+author: Andrés Limon Cruz
+date: "`r format(Sys.Date(), '%d de %B del %Y')`"
 output: 
-  bookdown::pdf_document2:
-    number_sections: no
-    toc: no
-    highlight: tango
-    includes:
-      in_header: Auxiliares/preambulo.tex
-      before_body: Auxiliares/portada.tex
-      after_body: null
-geometry: margin=2.5cm
+  html_document:
+    theme: united
+    toc: yes
+    toc_depth: 3
+    css: "Auxiliares/preferencias.css"
 decoding: UTF-8
 ---
 
@@ -26,10 +17,10 @@ gc()
 knitr::opts_chunk$set(
 	error = F,
 	fig.align = "center",
-	fig.dim = c(5, 3),
+	fig.dim = c(10, 6.5),
 	message = FALSE,
 	warning = FALSE,
-	echo = FALSE
+	echo = TRUE
 )
 
 
@@ -44,16 +35,20 @@ theme_set(theme_minimal())
 PALETA <- c("#007bff","#ff7f0e","#2ca02c","#d62728","#9467bd","#0012b5ff","#ca5e00ff","#1b5f1bff","#901b1bff","#583379ff")
 ```
 
-## \href{Ejercicios/Ejercicio1.rmd}{Predicción en el caso continuo}
+# Resultados de elecciones en Baja California
 ```{r, child = "Ejercicios/Ejercicio1.rmd"}
 
 ```
 
 
-## \href{Ejercicios/Ejercicio2.rmd}{Clasificación supervisada}
+# Segmentación de clientes
 ```{r, child = "Ejercicios/Ejercicio2.rmd"}
 
 ```
 
 
+# Homicidos en ""
+```{r, child = "Ejercicios/Ejercicio3.rmd"}
+
+```
 
