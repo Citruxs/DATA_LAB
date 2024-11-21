@@ -1,0 +1,28 @@
+body {
+    /*background-color: ;  Color de fondo */
+    margin: 0px; /* Margen exterior */
+    padding: 10px; /* Relleno interior */
+    font-family: Arial, sans-serif; /* Tipo de letra */
+    font-size: 14px; /* Tamaño de letra */
+    line-height: 1.6; /* Interlineado */
+}
+h1 {
+    font-size: 24px;
+    text-align: center; /* Centrar título principal */
+    border-bottom: 2px solid #0056b3; /* Línea decorativa */
+    padding-bottom: 5px;
+}
+h2 {
+    font-size: 18px;
+    color: #0056b3;
+    margin-top: 20px;
+}
+a {
+    color: #0056b3; /* Color del enlace */
+    text-decoration: none; /* Elimina el subrayado */
+}
+
+a:hover {
+    color: #ff5722; /* Color al pasar el ratón */
+    text-decoration: underline; /* Agrega subrayado al pasar el ratón */
+}
