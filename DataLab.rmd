@@ -1,14 +1,10 @@
 ---
-title: Ejercicios prácticos - Ciencia de Datos
-author: Andrés Limon Cruz
-date: "`r format(Sys.Date(), '%d de %B del %Y')`"
 output: 
-  html_document:
-    theme: united
-    toc: yes
-    toc_depth: 3
+  bookdown::gitbook:
+    output_file: "DataLab_ALC.html"
     css: "Auxiliares/preferencias.css"
-decoding: UTF-8
+    split_by: "chapter"
+    number_sections: false
 ---
 
 ```{r setup, include=FALSE}
@@ -34,6 +30,11 @@ theme_set(theme_minimal())
 #Paleta de colores en hexadecimal:
 PALETA <- c("#007bff","#ff7f0e","#2ca02c","#d62728","#9467bd","#0012b5ff","#ca5e00ff","#1b5f1bff","#901b1bff","#583379ff")
 ```
+
+# Inicio
+<h2 style="font-size: 3em; text-align: center;">Ejercicios prácticos</h1>
+<h2 style="font-size: 2em; text-align: center;">Autor: Andrés Limón Cruz</h2>
+<p style="font-size: 1.5em; text-align: center;">Fecha: `r Sys.Date()`</p>
 
 # Resultados de elecciones en Baja California
 ```{r, child = "Ejercicios/Ejercicio1.rmd"}
