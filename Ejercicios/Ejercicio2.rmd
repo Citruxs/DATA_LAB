@@ -81,17 +81,17 @@ medias
 Observemos los clusters en un gráfico sobre las 2 componentes principales (Es importante notar que hace falta la tercera componente)
 
 ```{r}
-fviz_cluster(modelo_k, data = proyecciones)
+fviz_cluster(modelo_k, data = proyecciones) + scale_color_manual(values = PALETA)
 ```
 
 Por ultimo interpretemos los clusters en función de las medias obtenidas, para esto observemos las gráficas de las densidades de cada componente y las medias obtenidas en cada clúster.
 
 ```{r}
-ggplot() + geom_density(mapping = aes(x = proyecciones$RC1), fill = "blue", alpha = 0.5) + geom_vline(mapping = aes(xintercept = medias$RC1, colour = as.factor(medias$`modelo_k$cluster`))) + labs(title = "Densidad de la componente `Calidad del servicio`", color = c("Clúster")) + theme_minimal()
+ggplot() + geom_density(mapping = aes(x = proyecciones$RC1)) + geom_vline(mapping = aes(xintercept = medias$RC1, colour = as.factor(medias$`modelo_k$cluster`))) + labs(title = "Densidad de la componente `Calidad del servicio`", color = c("Clúster"), x = "Proyecciones del componente" , y = "Densidad") + scale_color_manual(values = PALETA)
 
-ggplot() + geom_density(mapping = aes(x = proyecciones$RC2), fill = "blue", alpha = 0.5) + geom_vline(mapping = aes(xintercept = medias$RC2, colour = as.factor(medias$`modelo_k$cluster`))) + labs(title = "Densidad de la componente `Crecimiento del negocio`", color = c("Clúster")) + theme_minimal()
+ggplot() + geom_density(mapping = aes(x = proyecciones$RC2)) + geom_vline(mapping = aes(xintercept = medias$RC2, colour = as.factor(medias$`modelo_k$cluster`))) + labs(title = "Densidad de la componente `Crecimiento del negocio`", color = c("Clúster"), x = "Proyecciones del componente" , y = "Densidad") + scale_color_manual(values = PALETA)
 
-ggplot() + geom_density(mapping = aes(x = proyecciones$RC3), fill = "blue", alpha = 0.5) + geom_vline(mapping = aes(xintercept = medias$RC3, colour = as.factor(medias$`modelo_k$cluster`))) + labs(title = "Densidad de la componente `Demografía`", color = c("Clúster")) + theme_minimal()
+ggplot() + geom_density(mapping = aes(x = proyecciones$RC3)) + geom_vline(mapping = aes(xintercept = medias$RC3, colour = as.factor(medias$`modelo_k$cluster`))) + labs(title = "Densidad de la componente `Demografía`", color = c("Clúster"), x = "Proyecciones del componente" , y = "Densidad") + scale_color_manual(values = PALETA)
 ```
 Así con esto tenemos que:
 

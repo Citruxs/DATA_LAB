@@ -135,7 +135,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
       <nav role="navigation">
 
 <ul class="summary">
-<li class="chapter" data-level="" data-path="index.html"><a href="index.html"><i class="fa fa-check"></i>index</a></li>
+<li class="chapter" data-level="" data-path="index.html"><a href="index.html"><i class="fa fa-check"></i>Bienvenida</a></li>
 <li class="chapter" data-level="" data-path="resultados-de-elecciones-en-baja-california.html"><a href="resultados-de-elecciones-en-baja-california.html"><i class="fa fa-check"></i>Resultados de elecciones en Baja California</a></li>
 <li class="chapter" data-level="" data-path="segmentación-de-clientes.html"><a href="segmentación-de-clientes.html"><i class="fa fa-check"></i>Segmentación de clientes</a></li>
 <li class="chapter" data-level="" data-path="homicidos-en-guerrero.html"><a href="homicidos-en-guerrero.html"><i class="fa fa-check"></i>Homicidos en Guerrero</a></li>
@@ -221,7 +221,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 ##  Sieve-bootstrap Shapiro Test
 ## 
 ## data:  Y
-## bootstrap-Shapiro = 0.98151, p-value = 0.733
+## bootstrap-Shapiro = 0.98188, p-value = 0.684
 ## alternative hypothesis: Y does not follow a Gaussian Process</code></pre>
 <p>Utilizamos la herramienta anterior que se basa en metodos de bootstrap para determinar que los residuos se distribuyen como una normal.</p>
 <p>Revisemos un modelo mas, un suavizamiento Holt-Winters</p>
@@ -247,7 +247,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 ##  Sieve-bootstrap Shapiro Test
 ## 
 ## data:  Y
-## bootstrap-Shapiro = 0.9574, p-value = 0.994
+## bootstrap-Shapiro = 0.95979, p-value = 0.988
 ## alternative hypothesis: Y does not follow a Gaussian Process</code></pre>
 <p>Tenemos que se cumple la varianza constante y normalidad en nuestros residuos, el modelo es adecuado estadisticamente hablado.</p>
 <p>Así el modelo que consideramos usar en un modelo Holt-Winter con coeficientes:</p>
@@ -261,7 +261,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <span id="cb45-2"><a href="homicidos-en-guerrero.html#cb45-2" tabindex="-1"></a></span>
 <span id="cb45-3"><a href="homicidos-en-guerrero.html#cb45-3" tabindex="-1"></a>mod2_HW <span class="ot">&lt;-</span> <span class="fu">HoltWinters</span>(ts_12, <span class="at">alpha =</span> mod_HW<span class="sc">$</span>alpha, <span class="at">beta =</span> mod_HW<span class="sc">$</span>beta, <span class="at">gamma =</span> mod_HW<span class="sc">$</span>gamma)</span>
 <span id="cb45-4"><a href="homicidos-en-guerrero.html#cb45-4" tabindex="-1"></a></span>
-<span id="cb45-5"><a href="homicidos-en-guerrero.html#cb45-5" tabindex="-1"></a>prediccion <span class="ot">&lt;-</span> forecast<span class="sc">::</span><span class="fu">forecast</span>(mod_HW, <span class="at">h =</span> <span class="dv">12</span>) <span class="co"># Predecimos el proximo año</span></span>
+<span id="cb45-5"><a href="homicidos-en-guerrero.html#cb45-5" tabindex="-1"></a>prediccion <span class="ot">&lt;-</span> forecast<span class="sc">::</span><span class="fu">forecast</span>(mod2_HW, <span class="at">h =</span> <span class="dv">12</span>) <span class="co"># Predecimos el proximo año</span></span>
 <span id="cb45-6"><a href="homicidos-en-guerrero.html#cb45-6" tabindex="-1"></a></span>
 <span id="cb45-7"><a href="homicidos-en-guerrero.html#cb45-7" tabindex="-1"></a><span class="fu">plot</span>(prediccion)</span></code></pre></div>
 <p><img src="DataLab_files/figure-html/unnamed-chunk-52-1.png" width="960" style="display: block; margin: auto;" /></p>

@@ -39,7 +39,7 @@ PALETA <- c("#007bff","#ff7f0e","#2ca02c","#d62728","#9467bd","#0012b5ff","#ca5e
 ```
 
 # index
-<h2 style="font-size: 3em; text-align: center;">Ciencia de Datos<br>Ejercicios prácticos</h1>
+<h2 style="font-size: 3em; text-align: center;">Ciencia de Datos<br>Ejercicios prácticos</h2>
 <h2 style="font-size: 2em; text-align: center;">Autor: Andrés Limón Cruz</h2>
 <h2 style="font-size: 1.5em; text-align: center;">Fecha: `r Sys.Date()`</h2>
 

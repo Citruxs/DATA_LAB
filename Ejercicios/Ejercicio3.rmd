@@ -124,7 +124,7 @@ ts_12 <- ts(ts_12$`Homicidio_Homicidio-doloso`, start = 0, frequency = 21)
 
 mod2_HW <- HoltWinters(ts_12, alpha = mod_HW$alpha, beta = mod_HW$beta, gamma = mod_HW$gamma)
 
-prediccion <- forecast::forecast(mod_HW, h = 12) # Predecimos el proximo año
+prediccion <- forecast::forecast(mod2_HW, h = 12) # Predecimos el proximo año
 
 plot(prediccion)
 ```
