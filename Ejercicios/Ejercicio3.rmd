@@ -1,41 +1,132 @@
 
+3. Usando la información del archivo ejercicio_3.csv realizar un pronóstico de la serie de tiempo (de alguna entidad que sea de su interés) para un periodo de tiempo “razonable”, explicar este último punto.
+
 ```{r}
 ts <- read_csv("ejercicio_3.csv")
 ts$Clave_Ent <- as.factor(ts$Clave_Ent)
 ```
 
-```{r}
-ts_21 <- ts %>% filter(Clave_Ent == 21)
-```
-
+Tomamos para este ejercicio a la entidad federativa del estado de Guerrero, pues es uno de los estados mas violentos del país, ademas de contar con destinos turisticos que intuimos estan correlacionados con la cantidad de homicidios que ocurren en esta entidad, el Estado de Guerrero es la entidad federativa número 12, por lo que filtramos los datos originales y eliminamos la columna que hace referencia al numero de Estado.
 
 ```{r}
-ts_21
+ts_12 <- ts %>% filter(Clave_Ent == 12) %>% select(-3)
+print(head(ts_12))
+```
+
+Con los datos ya filtrados y limpios, lo que haremos ahora será dividir nuestro conjunto de datos en 2 partes, una parte para entrenamiento y otra para test, utilizamos una división de 75-25
+
+```{r}
+n = as.integer(length(ts_12$`Homicidio_Homicidio-doloso`) * 0.75)
+ts_12_entrenamiento <- ts_12$`Homicidio_Homicidio-doloso`[1:n]
+ts_12_test <- ts_12$`Homicidio_Homicidio-doloso`[(n+1):length(ts_12$`Homicidio_Homicidio-doloso`)]
+plot(ts_12_entrenamiento, type = "l")
+```
+
+No vemos problemas evidentes con tener una varianza constante a lo largo de los datos.
+
+Encontremos primero la estacionalidad de nuestra serie con ayuda de pruebas de hipótesis y de manera gráfica:
+
+```{r}
+par(mfrow = c(1,2))
+acf(ts_12_entrenamiento, lag.max = 30)
+pacf(ts_12_entrenamiento, lag.max = 30)
+```
+
+Podemos sospechar que con los datos de entrenamiento tenemos una estacionalidad cada 21 meses como lo muestra nuesto ACF. Entonces tomamos a 10 como la estacionalidad de la serie de tiempo, y así ajustemos nuevamente nuestros datos en el objeto adecuado.
+
+```{r}
+ts_12_entrenamiento <- ts(ts_12_entrenamiento, start = 0, frequency = 21)
+plot(ts_12_entrenamiento)
+```
+
+Notemos que la interpretacion se complica un poco, pues la escala de tiempo ahora esta en que cada unidad representa 21 meses
+
+Con los datos convertidos en un objeto mas apropiado, podemos pasar a hacer una descomposición clásica con la funcion `decompose()`
+
+```{r}
+plot(decompose(ts_12_entrenamiento))
+```
+
+Empezaremos con un modelo SARIMA que será determinado con ayuda de la función `auto.arima()`
+
+```{r}
+mod_arima <- auto.arima(ts_12_entrenamiento)
+prediccion <- forecast::forecast(mod_arima, h = length(ts_12_test)) 
+plot(prediccion)
+```
+
+Nuestro modelo principal parece débil, sin embargo evaluemos su poder predictivo, calculando el error cuadratico medio de los datos predecidos y de los datos del set de prueba:
+
+```{r}
+sum((ts_12_test - prediccion$mean)^2)
+```
+
+Así con este modelo tenemos un bajo desempeño como se esperaba. Pese a que nuestro enfoque reside en la predicción no está demás considerar unas pruebas de hipótesis para determinar si el modelo resulta adecuado para el modelado (Recordemos que nos interesa obetner un ruido blanco adecuado o lo que es lo mismo, a ver separado de manera adecuada las componentes):
+
+Veamos varianza constante:
+
+```{r}
+Y <- as.numeric(mod_arima$residuals)
+X <- 1:length(Y)
+
+bptest(Y~X)
+```
+
+Se cumple varianza constante, veamos ahora normalidad
+
+```{r}
+set.seed(123)
+shapiro_bootstrap.test(Y)
+```
+
+Utilizamos la herramienta anterior que se basa en metodos de bootstrap para determinar que los residuos se distribuyen como una normal.
+
+Revisemos un modelo mas, un suavizamiento Holt-Winters
+
+```{r}
+mod_HW <- HoltWinters(ts_12_entrenamiento)
+prediccion <- forecast::forecast(mod_HW, h = length(ts_12_test))
+plot(prediccion)
+```
+
+Revisemos su poder predictivo:
+
+```{r}
+sum((ts_12_test - prediccion$mean)^2)
+```
+
+Tenemos un menor error, consideremos ahora las pruebas de hipotesis para ver que tenemos un buen modelo estadisticamente hablando:
+
+```{r}
+Y <- as.numeric(ts_12_test - prediccion$mean)
+X <- 1:length(Y)
 ```
 
 ```{r}
-ts_21 <- ts(ts_21$`Homicidio_Homicidio-doloso`, start = c(2017,1), frequency = 24)
+set.seed(123)
+bptest(Y~X)
+
+shapiro_bootstrap.test(Y)
 ```
 
+Tenemos que se cumple la varianza constante y normalidad en nuestros residuos, el modelo es adecuado estadisticamente hablado.
+
+Así el modelo que consideramos usar en un modelo Holt-Winter con coeficientes:
 
 ```{r}
-ts.plot(ts_21)
+data.frame(parametro = c("alpha","beta","gamma"), valor =  c(mod_HW$alpha,mod_HW$beta,mod_HW$gamma))
 ```
+
+Ajustemos este modelo para el conjunto de datos completo
 
 ```{r}
-modelo <- auto.arima(ts_21)
-plot(forecast(modelo, h = 36))
+ts_12 <- ts(ts_12$`Homicidio_Homicidio-doloso`, start = 0, frequency = 21)
+
+mod2_HW <- HoltWinters(ts_12, alpha = mod_HW$alpha, beta = mod_HW$beta, gamma = mod_HW$gamma)
+
+prediccion <- forecast::forecast(mod_HW, h = 12) # Predecimos el proximo año
+
+plot(prediccion)
 ```
-
-```{r}
-modelo <- auto.arima(ts_21)
-modelo
-```
-
-
-```{r}
-plot(forecast(HoltWinters(ts_21),24))
-```
-
 
 \newpage

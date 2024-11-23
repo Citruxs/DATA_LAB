@@ -29,7 +29,7 @@
   
   
 <link rel="prev" href="resultados-de-elecciones-en-baja-california.html"/>
-<link rel="next" href="homicidos-en.html"/>
+<link rel="next" href="homicidos-en-guerrero.html"/>
 <script src="libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/fuse.js@6.4.6/dist/fuse.min.js"></script>
 <link href="libs/gitbook-2.6.7/css/style.css" rel="stylesheet" />
@@ -135,10 +135,10 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
       <nav role="navigation">
 
 <ul class="summary">
-<li class="chapter" data-level="" data-path="inicio.html"><a href="inicio.html"><i class="fa fa-check"></i>Inicio</a></li>
+<li class="chapter" data-level="" data-path="index.html"><a href="index.html"><i class="fa fa-check"></i>index</a></li>
 <li class="chapter" data-level="" data-path="resultados-de-elecciones-en-baja-california.html"><a href="resultados-de-elecciones-en-baja-california.html"><i class="fa fa-check"></i>Resultados de elecciones en Baja California</a></li>
 <li class="chapter" data-level="" data-path="segmentación-de-clientes.html"><a href="segmentación-de-clientes.html"><i class="fa fa-check"></i>Segmentación de clientes</a></li>
-<li class="chapter" data-level="" data-path="homicidos-en.html"><a href="homicidos-en.html"><i class="fa fa-check"></i>Homicidos en “”</a></li>
+<li class="chapter" data-level="" data-path="homicidos-en-guerrero.html"><a href="homicidos-en-guerrero.html"><i class="fa fa-check"></i>Homicidos en Guerrero</a></li>
 </ul>
 
       </nav>
@@ -158,7 +158,108 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
             <section class="normal" id="section-">
 <div id="segmentación-de-clientes" class="section level1 hasAnchor">
 <h1>Segmentación de clientes<a href="segmentación-de-clientes.html#segmentación-de-clientes" class="anchor-section" aria-label="Anchor link to header"></a></h1>
-<div style="page-break-after: always;"></div>
+<ol start="2" style="list-style-type: decimal">
+<li>Usando la información del archivo ejercicio_2.csv realizar una segmentación de clientes. Explicar los procedimientos.</li>
+</ol>
+<p>Para este proceso podemos realizar métodos de aprendizaje no supervisado para encontrar grupos que tengan características similares y podamos segmentar a los clientes según sus necesidades, de esta manera haremos un reducción de la dimensionalidad con componentes principales y luego haremos un clustering por medio de k-means, donde solo consideraremos variables numéricas.</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="segmentación-de-clientes.html#cb5-1" tabindex="-1"></a>data <span class="ot">&lt;-</span> <span class="fu">read_csv</span>(<span class="st">&quot;ejercicio_2.csv&quot;</span>)</span>
+<span id="cb5-2"><a href="segmentación-de-clientes.html#cb5-2" tabindex="-1"></a><span class="fu">print</span>(<span class="fu">str</span>(data))</span></code></pre></div>
+<pre><code>## spc_tbl_ [2,500 × 10] (S3: spec_tbl_df/tbl_df/tbl/data.frame)
+##  $ negocio_id            : num [1:2500] 0 1 2 3 4 5 6 7 8 9 ...
+##  $ porc_crecimiento_anual: num [1:2500] 0.416 0.318 0.804 0.188 0.172 ...
+##  $ calificacion_desempeno: num [1:2500] 0.855 0.495 0.355 0.895 0.745 0.695 0.535 0.945 0.725 0.705 ...
+##  $ anaquel_competencia   : num [1:2500] 0 1 0 0 1 0 0 1 1 0 ...
+##  $ anaquel_negocio       : num [1:2500] 2 2 3 3 2 3 2 3 3 2 ...
+##  $ respeto               : num [1:2500] 1 0 0 1 0.75 1 1 1 1 1 ...
+##  $ poblacion_zona_negocio: num [1:2500] 1905 8098 3925 3094 8098 ...
+##  $ clase_negocio         : chr [1:2500] &quot;B&quot; &quot;B&quot; &quot;B&quot; &quot;A&quot; ...
+##  $ ingreso_promedio_m    : num [1:2500] 8373 6612 4078 6985 16907 ...
+##  $ enfriador             : num [1:2500] 1 1 1 1 1 1 1 1 1 1 ...
+##  - attr(*, &quot;spec&quot;)=
+##   .. cols(
+##   ..   negocio_id = col_double(),
+##   ..   porc_crecimiento_anual = col_double(),
+##   ..   calificacion_desempeno = col_double(),
+##   ..   anaquel_competencia = col_double(),
+##   ..   anaquel_negocio = col_double(),
+##   ..   respeto = col_double(),
+##   ..   poblacion_zona_negocio = col_double(),
+##   ..   clase_negocio = col_character(),
+##   ..   ingreso_promedio_m = col_double(),
+##   ..   enfriador = col_double()
+##   .. )
+##  - attr(*, &quot;problems&quot;)=&lt;externalptr&gt; 
+## NULL</code></pre>
+<p>Por lo tanto no consideramos a las columnas: <code>negocio_id, anaquel competencia, anaquel negocio, clase_negocio y enfriador</code>, pues algunas son variables categóricas nominales u ordinales e impiden que podamos hacer una segmentación correcta, además retiramos cualquier <code>NA</code> que pueda haber en el dataset.</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="segmentación-de-clientes.html#cb7-1" tabindex="-1"></a>data <span class="ot">&lt;-</span> <span class="fu">subset</span>(data, <span class="at">select =</span> <span class="sc">-</span><span class="fu">c</span>(<span class="dv">1</span>,<span class="dv">4</span>,<span class="dv">5</span>,<span class="dv">8</span>,<span class="dv">10</span>))</span>
+<span id="cb7-2"><a href="segmentación-de-clientes.html#cb7-2" tabindex="-1"></a>data <span class="ot">&lt;-</span> data <span class="sc">%&gt;%</span> <span class="fu">na.omit</span>()</span></code></pre></div>
+<p>De esta manera, al utilizar la función <code>principal</code>, obtenemos los componentes principales de las variables de nuestro dataset, consideramos una rotación <code>varimax</code> pues nos facilita la interpretación de los componentes resultantes</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="segmentación-de-clientes.html#cb8-1" tabindex="-1"></a>modelo <span class="ot">&lt;-</span> <span class="fu">principal</span>(<span class="fu">scale</span>(data), <span class="at">nfactors =</span> <span class="dv">3</span>, <span class="at">rotate =</span> <span class="st">&quot;varimax&quot;</span>)</span>
+<span id="cb8-2"><a href="segmentación-de-clientes.html#cb8-2" tabindex="-1"></a><span class="fu">fa.diagram</span>(modelo)</span></code></pre></div>
+<p><img src="DataLab_files/figure-html/unnamed-chunk-17-1.png" width="960" style="display: block; margin: auto;" /></p>
+<p>Notemos rápidamente que estos 3 componentes tienen características en común y los podemos agrupar en una “etiqueta” según corresponda su giro:</p>
+<p>Componente 1: <code>Calidad de servicio</code>, aquí tenemos a las variables <code>calificacion_desempeno</code> y <code>respeto</code>, las cuales las podemos asociar a una percepción de la calidad en el servicio que el negocio brinda, donde al tener un mayor valor sobre este componente se asociaría a una mejor percepción de la calidad del servicio.</p>
+<p>Componente 2: <code>Crecimiento del negocio</code>, aquí tenemos las variables <code>porc_crecimiento_anual</code> e <code>ingreso_promedio_m</code>, las cuales se asocian al crecimiento en los ingresos que el negocio percibe, donde un mayor valor en este componente se asociaría a un mayor crecimiento en los ingresos del negocio.</p>
+<p>Componente 3: <code>Demografia</code>, aquí solo tenemos una sola variable, la cual es <code>poblacion_zona_negocio</code>, esta variable mide la cantidad de población que se encuentra en la zona del negocio, donde un mayor valor en este componente se asociaría a una mayor cantidad de población en la zona del negocio.</p>
+<p>Con estas 3 componentes tenemos un total de 71% de varianza explicada sobre el total de los datos.</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="segmentación-de-clientes.html#cb9-1" tabindex="-1"></a>varianza <span class="ot">&lt;-</span> modelo<span class="sc">$</span>Vaccounted[<span class="dv">2</span>,] <span class="sc">*</span> <span class="dv">100</span></span>
+<span id="cb9-2"><a href="segmentación-de-clientes.html#cb9-2" tabindex="-1"></a><span class="fu">cumsum</span>(varianza)</span></code></pre></div>
+<pre><code>##      RC1      RC2      RC3 
+## 28.03456 50.97494 71.00624</code></pre>
+<p>Ya que tenemos los componentes, podemos asignar a cada negocio su valuación sobre cada uno de estos componentes:</p>
+<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="segmentación-de-clientes.html#cb11-1" tabindex="-1"></a>proyecciones <span class="ot">&lt;-</span> <span class="fu">scale</span>(data) <span class="sc">%*%</span> modelo<span class="sc">$</span>loadings</span>
+<span id="cb11-2"><a href="segmentación-de-clientes.html#cb11-2" tabindex="-1"></a>proyecciones <span class="ot">&lt;-</span> <span class="fu">as.data.frame</span>(proyecciones)</span></code></pre></div>
+<p>Para realizar el proceso de clustering, habremos de determinar la cantidad de clusters que se ajusten mejor a nuestros datos, para ello utilizaremos el método de la silueta, el método de la distancia de Kullback-Leibler, el método de Calinski-Harabasz, el método de Dunn, el método de Hartigan, el método de Rubin, el método de Scott, el método de C-Index, el método de Ball, el método de Tracew y el método de la traza de Wilks.</p>
+<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="segmentación-de-clientes.html#cb12-1" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">211124</span>)</span>
+<span id="cb12-2"><a href="segmentación-de-clientes.html#cb12-2" tabindex="-1"></a>indices <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">&quot;silhouette&quot;</span>, <span class="st">&quot;kl&quot;</span>, <span class="st">&quot;ch&quot;</span>, <span class="st">&quot;dunn&quot;</span>, <span class="st">&quot;hartigan&quot;</span>, <span class="st">&quot;rubin&quot;</span>, <span class="st">&quot;scott&quot;</span>, <span class="st">&quot;cindex&quot;</span>, <span class="st">&quot;ball&quot;</span>, <span class="st">&quot;tracew&quot;</span>)</span>
+<span id="cb12-3"><a href="segmentación-de-clientes.html#cb12-3" tabindex="-1"></a>result_df <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">Index =</span> <span class="fu">character</span>(), <span class="at">Optimal_k =</span> <span class="fu">integer</span>(), <span class="at">stringsAsFactors =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb12-4"><a href="segmentación-de-clientes.html#cb12-4" tabindex="-1"></a><span class="cf">for</span> (index <span class="cf">in</span> indices) {</span>
+<span id="cb12-5"><a href="segmentación-de-clientes.html#cb12-5" tabindex="-1"></a>  result <span class="ot">&lt;-</span> <span class="fu">NbClust</span>(proyecciones, <span class="at">distance =</span> <span class="st">&quot;euclidean&quot;</span>, <span class="at">method =</span> <span class="st">&quot;kmeans&quot;</span>, <span class="at">max.nc =</span> <span class="dv">6</span>, <span class="at">index =</span> index)</span>
+<span id="cb12-6"><a href="segmentación-de-clientes.html#cb12-6" tabindex="-1"></a>  optimal <span class="ot">&lt;-</span> result<span class="sc">$</span>Best.nc[<span class="dv">1</span>]</span>
+<span id="cb12-7"><a href="segmentación-de-clientes.html#cb12-7" tabindex="-1"></a>  result_df <span class="ot">&lt;-</span> <span class="fu">rbind</span>(result_df, <span class="fu">data.frame</span>(<span class="at">Index =</span> index, <span class="at">Optimal_k =</span> optimal, <span class="at">stringsAsFactors =</span> <span class="cn">FALSE</span>))</span>
+<span id="cb12-8"><a href="segmentación-de-clientes.html#cb12-8" tabindex="-1"></a>}</span>
+<span id="cb12-9"><a href="segmentación-de-clientes.html#cb12-9" tabindex="-1"></a></span>
+<span id="cb12-10"><a href="segmentación-de-clientes.html#cb12-10" tabindex="-1"></a>result_df <span class="ot">&lt;-</span> result_df[<span class="fu">order</span>(result_df<span class="sc">$</span>Optimal_k), ]</span>
+<span id="cb12-11"><a href="segmentación-de-clientes.html#cb12-11" tabindex="-1"></a></span>
+<span id="cb12-12"><a href="segmentación-de-clientes.html#cb12-12" tabindex="-1"></a>result_df <span class="ot">&lt;-</span> result_df <span class="sc">%&gt;%</span></span>
+<span id="cb12-13"><a href="segmentación-de-clientes.html#cb12-13" tabindex="-1"></a>  <span class="fu">group_by</span>(Optimal_k) <span class="sc">%&gt;%</span> </span>
+<span id="cb12-14"><a href="segmentación-de-clientes.html#cb12-14" tabindex="-1"></a>  <span class="fu">summarize</span>(<span class="at">Indices =</span> <span class="fu">paste</span>(Index, <span class="at">collapse =</span> <span class="st">&quot;, &quot;</span>), <span class="at">.groups =</span> <span class="st">&quot;drop&quot;</span>)</span>
+<span id="cb12-15"><a href="segmentación-de-clientes.html#cb12-15" tabindex="-1"></a></span>
+<span id="cb12-16"><a href="segmentación-de-clientes.html#cb12-16" tabindex="-1"></a>result_df</span></code></pre></div>
+<pre><code>## # A tibble: 3 × 2
+##   Optimal_k Indices                                         
+##       &lt;dbl&gt; &lt;chr&gt;                                           
+## 1         3 ball                                            
+## 2         4 silhouette, dunn, hartigan, rubin, scott, tracew
+## 3         6 kl, ch, cindex</code></pre>
+<p>Así obtenemos que la mayoría de los indices nos indican hacer k-means con 4 clusters, por lo que procederemos a realizar el clustering con 4 clusters.</p>
+<div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb14-1"><a href="segmentación-de-clientes.html#cb14-1" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">211124</span>)</span>
+<span id="cb14-2"><a href="segmentación-de-clientes.html#cb14-2" tabindex="-1"></a>modelo_k <span class="ot">&lt;-</span> <span class="fu">kmeans</span>(proyecciones, <span class="at">centers =</span> <span class="dv">4</span>)</span></code></pre></div>
+<p>Una vez realizado el modelo, podemos agrupar a los negocios según el clúster al que pertenecen y obtener las medias de cada clúster en sus componentes principales.</p>
+<div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb15-1"><a href="segmentación-de-clientes.html#cb15-1" tabindex="-1"></a>medias <span class="ot">&lt;-</span> proyecciones <span class="sc">%&gt;%</span> <span class="fu">group_by</span>(modelo_k<span class="sc">$</span>cluster) <span class="sc">%&gt;%</span> <span class="fu">summarise_at</span>(<span class="fu">vars</span>(<span class="sc">-</span><span class="fu">group_cols</span>()), mean)</span>
+<span id="cb15-2"><a href="segmentación-de-clientes.html#cb15-2" tabindex="-1"></a>medias</span></code></pre></div>
+<pre><code>## # A tibble: 4 × 4
+##   `modelo_k$cluster`     RC1     RC2    RC3
+##                &lt;int&gt;   &lt;dbl&gt;   &lt;dbl&gt;  &lt;dbl&gt;
+## 1                  1  0.0535  5.46   -0.311
+## 2                  2  0.0324 -0.126   3.85 
+## 3                  3 -2.41   -0.285  -0.178
+## 4                  4  0.598  -0.0684 -0.169</code></pre>
+<p>Observemos los clusters en un gráfico sobre las 2 componentes principales (Es importante notar que hace falta la tercera componente)</p>
+<div class="sourceCode" id="cb17"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb17-1"><a href="segmentación-de-clientes.html#cb17-1" tabindex="-1"></a><span class="fu">fviz_cluster</span>(modelo_k, <span class="at">data =</span> proyecciones)</span></code></pre></div>
+<p><img src="DataLab_files/figure-html/unnamed-chunk-23-1.png" width="960" style="display: block; margin: auto;" /></p>
+<p>Por ultimo interpretemos los clusters en función de las medias obtenidas, para esto observemos las gráficas de las densidades de cada componente y las medias obtenidas en cada clúster.</p>
+<div class="sourceCode" id="cb18"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb18-1"><a href="segmentación-de-clientes.html#cb18-1" tabindex="-1"></a><span class="fu">ggplot</span>() <span class="sc">+</span> <span class="fu">geom_density</span>(<span class="at">mapping =</span> <span class="fu">aes</span>(<span class="at">x =</span> proyecciones<span class="sc">$</span>RC1), <span class="at">fill =</span> <span class="st">&quot;blue&quot;</span>, <span class="at">alpha =</span> <span class="fl">0.5</span>) <span class="sc">+</span> <span class="fu">geom_vline</span>(<span class="at">mapping =</span> <span class="fu">aes</span>(<span class="at">xintercept =</span> medias<span class="sc">$</span>RC1, <span class="at">colour =</span> <span class="fu">as.factor</span>(medias<span class="sc">$</span><span class="st">`</span><span class="at">modelo_k$cluster</span><span class="st">`</span>))) <span class="sc">+</span> <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">&quot;Densidad de la componente `Calidad del servicio`&quot;</span>, <span class="at">color =</span> <span class="fu">c</span>(<span class="st">&quot;Clúster&quot;</span>)) <span class="sc">+</span> <span class="fu">theme_minimal</span>()</span></code></pre></div>
+<p><img src="DataLab_files/figure-html/unnamed-chunk-24-1.png" width="960" style="display: block; margin: auto;" /></p>
+<div class="sourceCode" id="cb19"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb19-1"><a href="segmentación-de-clientes.html#cb19-1" tabindex="-1"></a><span class="fu">ggplot</span>() <span class="sc">+</span> <span class="fu">geom_density</span>(<span class="at">mapping =</span> <span class="fu">aes</span>(<span class="at">x =</span> proyecciones<span class="sc">$</span>RC2), <span class="at">fill =</span> <span class="st">&quot;blue&quot;</span>, <span class="at">alpha =</span> <span class="fl">0.5</span>) <span class="sc">+</span> <span class="fu">geom_vline</span>(<span class="at">mapping =</span> <span class="fu">aes</span>(<span class="at">xintercept =</span> medias<span class="sc">$</span>RC2, <span class="at">colour =</span> <span class="fu">as.factor</span>(medias<span class="sc">$</span><span class="st">`</span><span class="at">modelo_k$cluster</span><span class="st">`</span>))) <span class="sc">+</span> <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">&quot;Densidad de la componente `Crecimiento del negocio`&quot;</span>, <span class="at">color =</span> <span class="fu">c</span>(<span class="st">&quot;Clúster&quot;</span>)) <span class="sc">+</span> <span class="fu">theme_minimal</span>()</span></code></pre></div>
+<p><img src="DataLab_files/figure-html/unnamed-chunk-24-2.png" width="960" style="display: block; margin: auto;" /></p>
+<div class="sourceCode" id="cb20"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb20-1"><a href="segmentación-de-clientes.html#cb20-1" tabindex="-1"></a><span class="fu">ggplot</span>() <span class="sc">+</span> <span class="fu">geom_density</span>(<span class="at">mapping =</span> <span class="fu">aes</span>(<span class="at">x =</span> proyecciones<span class="sc">$</span>RC3), <span class="at">fill =</span> <span class="st">&quot;blue&quot;</span>, <span class="at">alpha =</span> <span class="fl">0.5</span>) <span class="sc">+</span> <span class="fu">geom_vline</span>(<span class="at">mapping =</span> <span class="fu">aes</span>(<span class="at">xintercept =</span> medias<span class="sc">$</span>RC3, <span class="at">colour =</span> <span class="fu">as.factor</span>(medias<span class="sc">$</span><span class="st">`</span><span class="at">modelo_k$cluster</span><span class="st">`</span>))) <span class="sc">+</span> <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">&quot;Densidad de la componente `Demografía`&quot;</span>, <span class="at">color =</span> <span class="fu">c</span>(<span class="st">&quot;Clúster&quot;</span>)) <span class="sc">+</span> <span class="fu">theme_minimal</span>()</span></code></pre></div>
+<p><img src="DataLab_files/figure-html/unnamed-chunk-24-3.png" width="960" style="display: block; margin: auto;" />
+Así con esto tenemos que:</p>
+<p>El clúster 1 tiene una baja percepción en la calidad del servicio, cuenta con una alta tasa en el crecimiento del negocio y se encuentra en zonas con muy baja densidad poblacional. Lo ideal para este grupo de negocios sería buscar estrategias para mejorar la percepción en la calidad de sus servicios, además de buscar estrategias para atraer a más clientes a sus negocios aprovechando la baja densidad poblacional.</p>
+<p>El clúster 2 tiene una baja percepción en la calidad del servicio, un bajo crecimiento en el negocio y se encuentra en zonas de alta densidad poblacional, este grupo de negocios se debería de enfocar en buscar mas clientes aprovechando su alta posibilidad de clientes para mejorar sus ingresos y a la par mejorar los servicios que ofrece para aumentar su buena percepción por parte del usuario.</p>
+<p>El clúster 3 tiene una muy baja percepción en la calidad de su servicio, un muy bajo crecimiento en el negocio y se encuentra en zonas con densidad poblacional baja, este tipo de negocios debe de buscar de manera urgente mejorar su percepción en la calidad de sus servicios, pues de otra manera la baja densidad poblacional lo someterá a un mayor estrés financiero.</p>
+<p>El clúster 4 tiene una alta percepción en la calidad de su servicio, un bajo crecimiento del negocio y se encuentra en zonas con baja densidad poblacional, este tipo de negocios debe de buscar atraer a nuevos clientes que aprovechen su buena calidad de servicio para aumentar sus ganancias.</p>
 </div>
             </section>
 
@@ -166,7 +267,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
         </div>
       </div>
 <a href="resultados-de-elecciones-en-baja-california.html" class="navigation navigation-prev " aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
-<a href="homicidos-en.html" class="navigation navigation-next " aria-label="Next page"><i class="fa fa-angle-right"></i></a>
+<a href="homicidos-en-guerrero.html" class="navigation navigation-next " aria-label="Next page"><i class="fa fa-angle-right"></i></a>
     </div>
   </div>
 <script src="libs/gitbook-2.6.7/js/app.min.js"></script>

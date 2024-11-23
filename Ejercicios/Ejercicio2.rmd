@@ -1,4 +1,105 @@
 
+2. Usando la información del archivo ejercicio_2.csv realizar una segmentación de clientes. Explicar los procedimientos.
 
+Para este proceso podemos realizar métodos de aprendizaje no supervisado para encontrar grupos que tengan características similares y podamos segmentar a los clientes según sus necesidades, de esta manera haremos un reducción de la dimensionalidad con componentes principales y luego haremos un clustering por medio de k-means, donde solo consideraremos variables numéricas.
 
-\newpage
+```{r}
+data <- read_csv("ejercicio_2.csv")
+print(str(data))
+```
+Por lo tanto no consideramos a las columnas: `negocio_id, anaquel competencia, anaquel negocio, clase_negocio y enfriador`, pues algunas son variables categóricas nominales u ordinales e impiden que podamos hacer una segmentación correcta, además retiramos cualquier `NA` que pueda haber en el dataset.
+
+```{r}
+data <- subset(data, select = -c(1,4,5,8,10))
+data <- data %>% na.omit()
+```
+
+De esta manera, al utilizar la función `principal`, obtenemos los componentes principales de las variables de nuestro dataset, consideramos una rotación `varimax` pues nos facilita la interpretación de los componentes resultantes
+
+```{r}
+modelo <- principal(scale(data), nfactors = 3, rotate = "varimax")
+fa.diagram(modelo)
+```
+
+Notemos rápidamente que estos 3 componentes tienen características en común y los podemos agrupar en una "etiqueta" según corresponda su giro:
+
+Componente 1: `Calidad de servicio`, aquí tenemos a las variables `calificacion_desempeno` y `respeto`, las cuales las podemos asociar a una percepción de la calidad en el servicio que el negocio brinda, donde al tener un mayor valor sobre este componente se asociaría a una mejor percepción de la calidad del servicio.
+
+Componente 2: `Crecimiento del negocio`, aquí tenemos las variables `porc_crecimiento_anual` e `ingreso_promedio_m`, las cuales se asocian al crecimiento en los ingresos que el negocio percibe, donde un mayor valor en este componente se asociaría a un mayor crecimiento en los ingresos del negocio.
+
+Componente 3: `Demografia`, aquí solo tenemos una sola variable, la cual es `poblacion_zona_negocio`, esta variable mide la cantidad de población que se encuentra en la zona del negocio, donde un mayor valor en este componente se asociaría a una mayor cantidad de población en la zona del negocio.
+
+Con estas 3 componentes tenemos un total de 71% de varianza explicada sobre el total de los datos.
+
+```{r}
+varianza <- modelo$Vaccounted[2,] * 100
+cumsum(varianza)
+```
+
+Ya que tenemos los componentes, podemos asignar a cada negocio su valuación sobre cada uno de estos componentes:
+
+```{r}
+proyecciones <- scale(data) %*% modelo$loadings
+proyecciones <- as.data.frame(proyecciones)
+```
+
+Para realizar el proceso de clustering, habremos de determinar la cantidad de clusters que se ajusten mejor a nuestros datos, para ello utilizaremos el método de la silueta, el método de la distancia de Kullback-Leibler, el método de Calinski-Harabasz, el método de Dunn, el método de Hartigan, el método de Rubin, el método de Scott, el método de C-Index, el método de Ball, el método de Tracew y el método de la traza de Wilks.
+
+```{r}
+set.seed(211124)
+indices <- c("silhouette", "kl", "ch", "dunn", "hartigan", "rubin", "scott", "cindex", "ball", "tracew")
+result_df <- data.frame(Index = character(), Optimal_k = integer(), stringsAsFactors = FALSE)
+for (index in indices) {
+  result <- NbClust(proyecciones, distance = "euclidean", method = "kmeans", max.nc = 6, index = index)
+  optimal <- result$Best.nc[1]
+  result_df <- rbind(result_df, data.frame(Index = index, Optimal_k = optimal, stringsAsFactors = FALSE))
+}
+
+result_df <- result_df[order(result_df$Optimal_k), ]
+
+result_df <- result_df %>%
+  group_by(Optimal_k) %>% 
+  summarize(Indices = paste(Index, collapse = ", "), .groups = "drop")
+
+result_df
+```
+
+Así obtenemos que la mayoría de los indices nos indican hacer k-means con 4 clusters, por lo que procederemos a realizar el clustering con 4 clusters.
+
+```{r}
+set.seed(211124)
+modelo_k <- kmeans(proyecciones, centers = 4)
+```
+
+Una vez realizado el modelo, podemos agrupar a los negocios según el clúster al que pertenecen y obtener las medias de cada clúster en sus componentes principales.
+
+```{r}
+medias <- proyecciones %>% group_by(modelo_k$cluster) %>% summarise_at(vars(-group_cols()), mean)
+medias
+```
+
+Observemos los clusters en un gráfico sobre las 2 componentes principales (Es importante notar que hace falta la tercera componente)
+
+```{r}
+fviz_cluster(modelo_k, data = proyecciones)
+```
+
+Por ultimo interpretemos los clusters en función de las medias obtenidas, para esto observemos las gráficas de las densidades de cada componente y las medias obtenidas en cada clúster.
+
+```{r}
+ggplot() + geom_density(mapping = aes(x = proyecciones$RC1), fill = "blue", alpha = 0.5) + geom_vline(mapping = aes(xintercept = medias$RC1, colour = as.factor(medias$`modelo_k$cluster`))) + labs(title = "Densidad de la componente `Calidad del servicio`", color = c("Clúster")) + theme_minimal()
+
+ggplot() + geom_density(mapping = aes(x = proyecciones$RC2), fill = "blue", alpha = 0.5) + geom_vline(mapping = aes(xintercept = medias$RC2, colour = as.factor(medias$`modelo_k$cluster`))) + labs(title = "Densidad de la componente `Crecimiento del negocio`", color = c("Clúster")) + theme_minimal()
+
+ggplot() + geom_density(mapping = aes(x = proyecciones$RC3), fill = "blue", alpha = 0.5) + geom_vline(mapping = aes(xintercept = medias$RC3, colour = as.factor(medias$`modelo_k$cluster`))) + labs(title = "Densidad de la componente `Demografía`", color = c("Clúster")) + theme_minimal()
+```
+Así con esto tenemos que:
+
+El clúster 1 tiene una baja percepción en la calidad del servicio, cuenta con una alta tasa en el crecimiento del negocio y se encuentra en zonas con muy baja densidad poblacional. Lo ideal para este grupo de negocios sería buscar estrategias para mejorar la percepción en la calidad de sus servicios, además de buscar estrategias para atraer a más clientes a sus negocios aprovechando la baja densidad poblacional.
+
+El clúster 2 tiene una baja percepción en la calidad del servicio, un bajo crecimiento en el negocio y se encuentra en zonas de alta densidad poblacional, este grupo de negocios se debería de enfocar en buscar mas clientes aprovechando su alta posibilidad de clientes para mejorar sus ingresos y a la par mejorar los servicios que ofrece para aumentar su buena percepción por parte del usuario.
+
+El clúster 3 tiene una muy baja percepción en la calidad de su servicio, un muy bajo crecimiento en el negocio y se encuentra en zonas con densidad poblacional baja, este tipo de negocios debe de buscar de manera urgente mejorar su percepción en la calidad de sus servicios, pues de otra manera la baja densidad poblacional lo someterá a un mayor estrés financiero.
+
+El clúster 4 tiene una alta percepción en la calidad de su servicio, un bajo crecimiento del negocio y se encuentra en zonas con baja densidad poblacional, este tipo de negocios debe de buscar atraer a nuevos clientes que aprovechen su buena calidad de servicio para aumentar sus ganancias.
+

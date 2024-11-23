@@ -24,6 +24,13 @@ knitr::opts_chunk$set(
 library(tidyverse)
 library(forecast)
 library(GGally)
+library(psych)
+library(factoextra)
+library(NbClust)
+library(seastests)
+library(lmtest)
+library(tseries)
+library(nortsTest)
 #Estilo global de gráficos
 theme_set(theme_minimal())
 
@@ -31,10 +38,10 @@ theme_set(theme_minimal())
 PALETA <- c("#007bff","#ff7f0e","#2ca02c","#d62728","#9467bd","#0012b5ff","#ca5e00ff","#1b5f1bff","#901b1bff","#583379ff")
 ```
 
-# Inicio
-<h2 style="font-size: 3em; text-align: center;">Ejercicios prácticos</h1>
+# index
+<h2 style="font-size: 3em; text-align: center;">Ciencia de Datos<br>Ejercicios prácticos</h1>
 <h2 style="font-size: 2em; text-align: center;">Autor: Andrés Limón Cruz</h2>
-<p style="font-size: 1.5em; text-align: center;">Fecha: `r Sys.Date()`</p>
+<h2 style="font-size: 1.5em; text-align: center;">Fecha: `r Sys.Date()`</h2>
 
 # Resultados de elecciones en Baja California
 ```{r, child = "Ejercicios/Ejercicio1.rmd"}
@@ -48,7 +55,7 @@ PALETA <- c("#007bff","#ff7f0e","#2ca02c","#d62728","#9467bd","#0012b5ff","#ca5e
 ```
 
 
-# Homicidos en ""
+# Homicidos en Guerrero
 ```{r, child = "Ejercicios/Ejercicio3.rmd"}
 
 ```
